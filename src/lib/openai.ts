@@ -17,7 +17,7 @@ export interface OpenAIChoice {
     role: 'assistant';
     content: string;
     refusal: null;
-    annotations: any[];
+    annotations: unknown[];
   };
   logprobs: null;
   finish_reason: string;
