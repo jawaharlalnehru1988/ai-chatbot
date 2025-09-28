@@ -13,9 +13,16 @@ export interface Message {
 interface MessagesDisplayProps {
   messages: Message[];
   isLoading?: boolean;
+  isStreaming?: boolean;
+  streamingMessageId?: string | null;
 }
 
-export default function MessagesDisplay({ messages, isLoading = false }: MessagesDisplayProps) {
+export default function MessagesDisplay({ 
+  messages, 
+  isLoading = false, 
+  isStreaming = false, 
+  streamingMessageId = null 
+}: MessagesDisplayProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -53,7 +60,20 @@ export default function MessagesDisplay({ messages, isLoading = false }: Message
                 {message.sender === 'user' ? (
                   <div className="whitespace-pre-wrap break-words">{message.text}</div>
                 ) : (
-                  <MessageContent content={message.text} />
+                  <div>
+                    <MessageContent content={message.text} />
+                    {/* Show streaming indicator for the current streaming message */}
+                    {isStreaming && message.id === streamingMessageId && (
+                      <div className="flex items-center mt-2 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="flex space-x-1 mr-2">
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce"></div>
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                          <div className="w-1 h-1 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        </div>
+                        <span>Streaming...</span>
+                      </div>
+                    )}
+                  </div>
                 )}
                 <div 
                   className={`text-xs mt-1 ${

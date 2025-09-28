@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://ai-chat-bot-backend-f6tf.vercel.app';
+const API_BASE_URL = '/api'; // Use Next.js API routes to avoid CORS
+// const API_BASE_URL = 'http://localhost:4000';
+// const API_BASE_URL = 'https://ai-chat-bot-backend-f6tf.vercel.app';
 
 export interface OpenAIMessage {
   role: 'user' | 'assistant' | 'system';
@@ -91,12 +93,17 @@ export class OpenAIService {
     return OpenAIService.instance;
   }
 
-  public async getChatCompletion(messages: OpenAIMessage[]): Promise<string> {
+  public async getChatCompletion(messages: OpenAIMessage[], useStreaming: boolean = false): Promise<string> {
     try {
-      const payload: OpenAIRequest = { messages };
+      const payload: OpenAIRequest & { useStreaming: boolean } = { 
+        messages, 
+        useStreaming 
+      };
+      
+      console.log(`🚀 Making ${useStreaming ? 'streaming' : 'regular'} API request`);
       
       const response = await this.apiClient.post<OpenAIResponse>(
-        '/openai/chatCompletion',
+        '/chat',
         payload
       );
 
