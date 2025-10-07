@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = 'http://localhost:4000';
-// const BACKEND_URL = 'https://ai-chat-bot-backend-f6tf.vercel.app';
+// const BACKEND_URL = 'http://localhost:4000';
+const BACKEND_URL = 'https://ai-chat-bot-backend-f6tf.vercel.app';
 
 export async function POST(request: NextRequest) {
   try {
