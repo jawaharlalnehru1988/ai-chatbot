@@ -43,7 +43,7 @@ export class StreamingService {
     return new Promise((resolve, reject) => {
       try {
         // Connect to your backend WebSocket
-        this.socket = io('http://localhost:4000', {
+        this.socket = io('https://ai-chat-bot-backend-f6tf.vercel.app', {
           transports: ['websocket'],
           timeout: 20000,
         });
