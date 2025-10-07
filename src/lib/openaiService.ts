@@ -64,7 +64,7 @@ class OpenAIService {
       });
 
       let fullContent = '';
-      let chunkId = `chunk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const chunkId = `chunk_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
       for await (const chunk of stream) {
         const content = chunk.choices[0]?.delta?.content || '';

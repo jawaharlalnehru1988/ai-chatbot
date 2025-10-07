@@ -47,7 +47,7 @@ export default function Chat({ chatId }: ChatProps = {}) {
         setMessages([]);
       }
     }
-  }, [activeChatId]); // Only activeChatId dependency
+  }, [activeChatId, getCurrentChatMessages]); // Include getCurrentChatMessages dependency
 
   // Helper function to update chat history manually when needed
   const updateChatHistoryManually = useCallback((chatId: string, newMessages: Message[]) => {
