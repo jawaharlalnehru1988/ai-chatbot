@@ -179,11 +179,22 @@ export default function Chat({ chatId }: ChatProps = {}) {
             throttleRef.current = null;
           }
           
-          setMessages(prev => prev.map(msg => 
-            msg.id === aiMessageId 
-              ? { ...msg, text: `Error: ${error}` }
-              : msg
-          ));
+          // Only show error if we don't have any content yet
+          // If we already received content, keep it and just stop streaming
+          setMessages(prev => prev.map(msg => {
+            if (msg.id === aiMessageId) {
+              // Keep existing content if we have any, otherwise show error
+              if (msg.text && msg.text.trim().length > 0) {
+                console.log('Keeping existing content, ignoring error:', error);
+                return msg; // Keep the message as is
+              } else {
+                // No content received yet, show the error
+                return { ...msg, text: `Error: ${error}` };
+              }
+            }
+            return msg;
+          }));
+          
           setIsStreaming(false);
           isStreamingRef.current = false; // Reset streaming ref on error
           setStreamingMessageId(null);

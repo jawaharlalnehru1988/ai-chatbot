@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// const BACKEND_URL = 'http://localhost:4000';
-const BACKEND_URL = 'https://ai-chat-bot-backend-f6tf.vercel.app';
-
+// Use local Next.js API routes instead of external backend
 export async function POST(request: NextRequest) {
   try {
     // Get the request body
     const body = await request.json();
     const { useStreaming, ...requestData } = body;
     
-    // Choose the correct endpoint based on streaming mode
+    // Get the base URL from the request
+    const baseUrl = new URL(request.url).origin;
+    
+    // Choose the correct local endpoint based on streaming mode
     const endpoint = useStreaming 
-      ? `${BACKEND_URL}/openai/chatCompletion` // Streaming endpoint
-      : `${BACKEND_URL}/openai/chatCompletion/simple`; // Regular endpoint
+      ? `${baseUrl}/api/openai/chatCompletion` // Streaming endpoint
+      : `${baseUrl}/api/openai/chatCompletion/simple`; // Regular endpoint
     
     console.log(`🎯 Using ${useStreaming ? 'streaming' : 'regular'} endpoint:`, endpoint);
     
@@ -24,16 +25,16 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
         },
-        body: JSON.stringify(requestData), // Send without the useStreaming flag
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Backend streaming error:', response.status, errorText);
+        console.error('Streaming endpoint error:', response.status, errorText);
         
         return NextResponse.json(
           { 
-            error: 'Backend streaming service error',
+            error: 'Streaming service error',
             details: `Status: ${response.status}`,
             message: response.status === 429 ? 'Rate limit exceeded' : 
                      response.status === 500 ? 'Internal server error' :
@@ -63,16 +64,16 @@ export async function POST(request: NextRequest) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestData), // Send without the useStreaming flag
+        body: JSON.stringify(requestData),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Backend error:', response.status, errorText);
+        console.error('Simple endpoint error:', response.status, errorText);
         
         return NextResponse.json(
           { 
-            error: 'Backend service error',
+            error: 'Service error',
             details: `Status: ${response.status}`,
             message: response.status === 429 ? 'Rate limit exceeded' : 
                      response.status === 500 ? 'Internal server error' :
@@ -89,19 +90,7 @@ export async function POST(request: NextRequest) {
     }
     
   } catch (error) {
-    console.error('API proxy error:', error);
-    
-    // Handle different types of errors
-    if (error instanceof TypeError && error.message.includes('fetch')) {
-      return NextResponse.json(
-        { 
-          error: 'Connection failed',
-          message: 'Unable to connect to the AI service. Please make sure the backend is running.',
-          details: 'ECONNREFUSED'
-        },
-        { status: 503 }
-      );
-    }
+    console.error('API error:', error);
     
     return NextResponse.json(
       { 

@@ -102,16 +102,24 @@ export class OpenAIService {
       
       console.log(`🚀 Making ${useStreaming ? 'streaming' : 'regular'} API request`);
       
-      const response = await this.apiClient.post<OpenAIResponse>(
+      const response = await this.apiClient.post(
         '/chat',
         payload
       );
 
-      if (response.data.choices && response.data.choices.length > 0) {
+      console.log('📦 Response data:', response.data);
+
+      // Handle both old format (with choices array) and new format (with content field)
+      if (response.data.content) {
+        // New format from our OpenAI service
+        return response.data.content;
+      } else if (response.data.choices && response.data.choices.length > 0) {
+        // Old format (fallback)
         const assistantMessage = response.data.choices[0].message;
         return assistantMessage.content;
       } else {
-        throw new Error('No response choices received from API');
+        console.error('Unexpected response format:', response.data);
+        throw new Error('No response content received from API');
       }
     } catch (error) {
       console.error('Error calling OpenAI API:', error);

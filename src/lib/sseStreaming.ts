@@ -92,15 +92,16 @@ export class SSEStreamingService {
                   
                   if (data.content) {
                     if (data.isComplete) {
-                      // Final chunk
+                      // Final chunk - use the complete content from the API
+                      fullContent = data.content;
                       console.log('✅ Streaming completed');
                       callbacks.onComplete?.(messageId, fullContent);
                       resolve(fullContent);
                       return;
                     } else {
-                      // Intermediate chunk
-                      fullContent += data.content;
-                      console.log('📦 Received chunk:', data.content, '| Full so far:', fullContent);
+                      // Intermediate chunk - data.content already contains the full accumulated text
+                      fullContent = data.content; // Replace, don't append!
+                      console.log('📦 Received chunk, full content length:', fullContent.length);
                       callbacks.onChunk?.(messageId, data.content, fullContent);
                     }
                   }
@@ -118,16 +119,20 @@ export class SSEStreamingService {
       })
       .catch((fetchError) => {
         console.error('❌ SSE fetch error:', fetchError);
-        callbacks.onError?.(messageId, fetchError.message);
-        reject(fetchError);
+        // Only show error if it's not an abort error
+        if (fetchError.name !== 'AbortError') {
+          callbacks.onError?.(messageId, fetchError.message);
+          reject(fetchError);
+        }
       });
 
-      // Timeout after 60 seconds
+      // Timeout after 5 minutes (300 seconds) - enough for long responses
       setTimeout(() => {
         controller.abort();
-        callbacks.onError?.(messageId, 'Request timeout');
+        console.warn('⏱️ Request timed out after 5 minutes');
+        callbacks.onError?.(messageId, 'Request timeout after 5 minutes');
         reject(new Error('Request timeout'));
-      }, 60000);
+      }, 30000000);
     });
   }
 }
